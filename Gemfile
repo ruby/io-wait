@@ -1,7 +1,4 @@
-source "https://rubygems.org"
+source 'https://rubygems.org'
 
-# Specify your gem's dependencies in io-wait.gemspec
+# Specify your gem's dependencies in etc.gemspec
 gemspec
-
-gem "rake", "~> 12.0"
-gem "minitest", "~> 5.0"
