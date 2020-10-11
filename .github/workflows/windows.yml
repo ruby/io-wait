@@ -1,0 +1,20 @@
+name: windows
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        ruby: [ 'head' ]
+    steps:
+    - uses: actions/checkout@master
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+    - name: Set up Bundler
+      run: gem install rake-compiler --no-document
+    - name: Run test
+      run: rake
