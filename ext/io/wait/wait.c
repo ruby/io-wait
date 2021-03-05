@@ -231,7 +231,7 @@ io_wait(int argc, VALUE *argv, VALUE io)
     VALUE timeout = Qundef;
     rb_io_event_t events = 0;
 
-    if (argc != 2 || (RB_SYRB_SYMBOL_P(argv[0]) || RB_SYMBOL_P(argv[1]))) {
+    if (argc != 2 || (RB_SYMBOL_P(argv[0]) || RB_SYMBOL_P(argv[1]))) {
 	for (int i = 0; i < argc; i += 1) {
 	    if (RB_SYMBOL_P(argv[i])) {
 		events |= wait_mode_sym(argv[i]);
