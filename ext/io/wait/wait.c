@@ -243,6 +243,7 @@ io_wait(int argc, VALUE *argv, VALUE io)
 		rb_raise(rb_eArgError, "timeout given more than once");
 	    }
 	}
+	if (timeout == Qundef) timeout = Qnil;
     }
     else /* argc == 2 */ {
 	events = RB_NUM2UINT(argv[0]);
