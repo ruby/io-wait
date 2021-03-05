@@ -9,3 +9,5 @@
 *.bundle
 *.dll
 *.so
+ChangeLog
+logs/
