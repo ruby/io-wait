@@ -13,11 +13,22 @@ if RUBY_VERSION < "2.6"
   end
   libs = []
 else
-  require 'rake/extensiontask'
-  extask = Rake::ExtensionTask.new(name) do |x|
-    x.lib_dir.sub!(%r[(?=/|\z)], "/#{RUBY_VERSION}/#{x.platform}")
+  if RUBY_PLATFORM =~ /java/
+    require 'rake/javaextensiontask'
+    Rake::JavaExtensionTask.new("wait") do |ext|
+      require 'maven/ruby/maven'
+      ext.source_version = '1.8'
+      ext.target_version = '1.8'
+      ext.ext_dir = 'ext/java'
+      ext.lib_dir = 'lib/io'
+    end
+  else
+    require 'rake/extensiontask'
+    extask = Rake::ExtensionTask.new(name) do |x|
+      x.lib_dir.sub!(%r[(?=/|\z)], "/#{RUBY_VERSION}/#{x.platform}")
+    end
+    libs = ["lib/#{RUBY_VERSION}/#{extask.platform}"]
   end
-  libs = ["lib/#{RUBY_VERSION}/#{extask.platform}"]
 end
 
 Rake::TestTask.new(:test) do |t|

@@ -13,3 +13,5 @@
 *.so
 ChangeLog
 Gemfile.lock
+logs/
+lib/io/wait.jar
