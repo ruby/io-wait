@@ -10,22 +10,7 @@ Rake::TestTask.new(:test) do |t|
 end
 
 require 'rake/extensiontask'
-class << Rake::ExtensionTask.new(name)
-  def evil_copy?(src, dest)
-    version = %r[/\d+(?:\.\d+){1,2}/]
-    src.include?(platform) and version =~ src and !(dest.include?(platform) and version =~ dest)
-  end
-
-  def install(src, dest, **)
-    return if evil_copy?(src, dest)
-    super
-  end
-  def cp(src, dest, **)
-    return if evil_copy?(src, dest)
-    super
-  end
-end
-
+Rake::ExtensionTask.new(name)
 task :test => :compile
 
 task :default => :test
