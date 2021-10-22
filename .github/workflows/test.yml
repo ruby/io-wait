@@ -1,13 +1,14 @@
-name: macos
+name: ci
 
 on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ${{ github.workflow }}-latest
+    runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
         ruby: [ 'head', '3.0' ]
+        os: [ ubuntu, macos, windows ]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Ruby
