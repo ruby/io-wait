@@ -6,7 +6,7 @@ require 'io/wait'
 # We may optimize IO#wait_*able for non-Linux kernels in the future
 class TestIOWaitUncommon < Test::Unit::TestCase
   def test_tty_wait
-    check_dev('/dev/tty', mode: 'w+') do |tty|
+    check_dev('/dev/tty', mode: 'r+') do |tty|
       assert_include [ nil, tty ], tty.wait_readable(0)
       assert_equal tty, tty.wait_writable(1), 'portability test'
     end
