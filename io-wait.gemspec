@@ -3,8 +3,8 @@ _VERSION = "0.2.2"
 Gem::Specification.new do |spec|
   spec.name          = "io-wait"
   spec.version       = _VERSION
-  spec.authors       = ["Nobu Nakada"]
-  spec.email         = ["nobu@ruby-lang.org"]
+  spec.authors       = ["Nobu Nakada", "Charles Oliver Nutter"]
+  spec.email         = ["nobu@ruby-lang.org", "headius@headius.com"]
 
   spec.summary       = %q{Waits until IO is readable or writable without blocking.}
   spec.description   = %q{Waits until IO is readable or writable without blocking.}
