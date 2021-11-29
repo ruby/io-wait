@@ -19,8 +19,16 @@ Gem::Specification.new do |spec|
       (f == __FILE__) || f.match(%r{\A(?:(?:bin|test|spec|features|rakelib)/|\.(?:git|travis|circleci)|appveyor|Rakefile)})
     end
   end
-  spec.extensions    = %w[ext/io/wait/extconf.rb]
   spec.bindir        = "exe"
   spec.executables   = []
   spec.require_paths = ["lib"]
+
+  if Gem::Platform === spec.platform and spec.platform =~ 'java' or RUBY_ENGINE == 'jruby'
+    spec.platform = 'java'
+
+    spec.files += Dir["ext/java/**/*.{rb,java}", "lib/io/wait.jar"]
+    spec.require_paths += ["ext/java/lib"]
+  else
+    spec.extensions    = %w[ext/io/wait/extconf.rb]
+  end
 end
