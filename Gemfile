@@ -7,4 +7,6 @@ group :development do
   gem "rake"
   gem "rake-compiler"
   gem "test-unit"
+  gem 'ruby-maven', :platforms => :jruby
 end
+
