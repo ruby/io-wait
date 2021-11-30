@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ${{ github.workflow }}-latest
+    runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
         ruby: [ 'jruby', '9.3' ]
