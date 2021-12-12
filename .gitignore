@@ -1,6 +1,3 @@
-*.bundle
-*.dll
-*.so
 /.bundle/
 /.yardoc
 /_yardoc/
@@ -11,4 +8,7 @@
 /pkg/
 /spec/reports/
 /tmp/
+*.bundle
+*.dll
+*.so
 ChangeLog
