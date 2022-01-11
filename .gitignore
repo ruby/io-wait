@@ -12,3 +12,4 @@
 *.dll
 *.so
 ChangeLog
+Gemfile.lock
