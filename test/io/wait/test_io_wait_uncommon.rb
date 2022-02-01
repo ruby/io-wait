@@ -14,7 +14,6 @@ class TestIOWaitUncommon < Test::Unit::TestCase
 
   def test_fifo_wait
     omit 'no mkfifo' unless File.respond_to?(:mkfifo) && IO.const_defined?(:NONBLOCK)
-    skip 'known bogus error in JRuby 9.3.0.0 and earlier' if RUBY_ENGINE == 'jruby' && JRUBY_VERSION < '9.3.1.0'
 
     require 'tmpdir'
     Dir.mktmpdir('rubytest-fifo') do |dir|
