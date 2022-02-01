@@ -9,6 +9,8 @@ jobs:
       matrix:
         ruby: [ 'head', '3.1', '3.0', '2.7', '2.6' ]
         os: [ ubuntu, macos, windows ]
+    outputs:
+      gem: ${{steps.build.outputs.gem}}
     steps:
     - name: git config
       run: |
@@ -28,10 +30,15 @@ jobs:
       run: |
         rake build:sha512
         cat pkg/SHA512
-        echo "::set-output name=pkg::${GITHUB_REPOSITORY#*/}-${RUNNING_OS%-*}"
+        set pkg/*.gem
+        gem=${2:-$1}
+        gem=${gem#*/}
+        gem=${gem%.gem}
+        echo "::set-output name=gem::$gem"
+        echo "::set-output name=pkg::$gem-${RUNNING_OS%-*}"
       env:
         RUNNING_OS: ${{matrix.os}}
-      if: "matrix.ruby == '3.1'"
+      if: ${{matrix.ruby}} == '3.1'
       shell: bash
     - name: Upload package
       uses: actions/upload-artifact@v2
@@ -39,8 +46,10 @@ jobs:
         path: pkg/*
         name: ${{steps.build.outputs.pkg}}
       if: steps.build.outputs.pkg
-  build:
+
+  install:
     runs-on: ${{ matrix.os }}-latest
+    needs: test
     strategy:
       matrix:
         ruby: [ '2.5' ]
@@ -51,7 +60,9 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
-    - name: Set up Bundler
-      run: bundle install
+    - uses: actions/download-artifact@master
+      with:
+        name: ${{needs.test.outputs.gem}}-macos
+        path: pkg
     - name: Install gem
-      run: bundle exec rake install
+      run: gem install pkg/${{needs.test.outputs.gem}}.gem
