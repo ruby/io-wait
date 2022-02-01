@@ -35,7 +35,7 @@ Rake::TestTask.new(:test) do |t|
   if RUBY_ENGINE == "jruby"
     t.libs = ["ext/java/lib", "lib"]
   else
-    t.libs << extask.lib_dir
+    t.libs = libs
   end
   t.libs << "test/lib"
   t.ruby_opts << "-rhelper"
