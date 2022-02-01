@@ -26,7 +26,8 @@ jobs:
       run: bundle exec rake
     - id: build
       run: |
-        rake build
+        rake build:sha512
+        cat pkg/SHA512
         echo "::set-output name=pkg::${GITHUB_REPOSITORY#*/}-${RUNNING_OS%-*}"
       env:
         RUNNING_OS: ${{matrix.os}}
@@ -35,7 +36,7 @@ jobs:
     - name: Upload package
       uses: actions/upload-artifact@v2
       with:
-        path: pkg/*.gem
+        path: pkg/*
         name: ${{steps.build.outputs.pkg}}
       if: steps.build.outputs.pkg
   build:
