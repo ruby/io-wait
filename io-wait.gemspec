@@ -23,10 +23,14 @@ Gem::Specification.new do |spec|
   spec.executables   = []
   spec.require_paths = ["lib"]
 
-  if Gem::Platform === spec.platform and spec.platform =~ 'java' or RUBY_ENGINE == 'jruby'
+  jruby = true if Gem::Platform.new('java') =~ spec.platform or RUBY_ENGINE == 'jruby'
+  spec.files.delete_if do |f|
+    f.end_with?(".java") or
+      f.start_with?("ext/") && (jruby ^ f.start_with?("ext/java/"))
+  end
+  if jruby
     spec.platform = 'java'
-
-    spec.files += Dir["ext/java/lib/io/wait.rb", "lib/io/wait.jar"]
+    spec.files << "lib/io/wait.jar"
     spec.require_paths += ["ext/java/lib"]
   else
     spec.extensions    = %w[ext/io/wait/extconf.rb]
