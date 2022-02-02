@@ -3,7 +3,8 @@ require "rake/testtask"
 
 name = "io/wait"
 
-if RUBY_VERSION < "2.6"
+case
+when RUBY_VERSION < "2.6"
   task :compile do
     # noop
   end
