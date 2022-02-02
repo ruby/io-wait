@@ -13,7 +13,8 @@ if RUBY_VERSION < "2.6"
   end
   libs = []
 else
-  if RUBY_ENGINE == 'jruby'
+  case RUBY_ENGINE
+  when 'jruby'
     require 'rake/javaextensiontask'
     Rake::JavaExtensionTask.new("wait") do |ext|
       require 'maven/ruby/maven'
@@ -22,6 +23,7 @@ else
       ext.ext_dir = 'ext/java'
       ext.lib_dir = 'lib/io'
     end
+    libs = ["ext/java/lib", "lib"]
   else
     require 'rake/extensiontask'
     extask = Rake::ExtensionTask.new(name) do |x|
@@ -32,11 +34,7 @@ else
 end
 
 Rake::TestTask.new(:test) do |t|
-  if RUBY_ENGINE == "jruby"
-    t.libs = ["ext/java/lib", "lib"]
-  else
-    t.libs = libs
-  end
+  t.libs = libs
   t.libs << "test/lib"
   t.ruby_opts << "-rhelper"
   t.test_files = FileList["test/**/test_*.rb"]

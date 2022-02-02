@@ -9,4 +9,3 @@ group :development do
   gem "test-unit"
   gem 'ruby-maven', :platforms => :jruby
 end
-
