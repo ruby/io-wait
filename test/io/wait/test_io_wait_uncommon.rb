@@ -14,7 +14,6 @@ class TestIOWaitUncommon < Test::Unit::TestCase
 
   def test_fifo_wait
     omit 'no mkfifo' unless File.respond_to?(:mkfifo) && IO.const_defined?(:NONBLOCK)
-
     require 'tmpdir'
     Dir.mktmpdir('rubytest-fifo') do |dir|
       fifo = "#{dir}/fifo"
