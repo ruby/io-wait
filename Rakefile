@@ -13,6 +13,8 @@ when RUBY_ENGINE == "jruby"
     ext.ext_dir = 'ext/java'
     ext.lib_dir = 'lib/io'
   end
+  task "build" => "lib/io/wait.jar"
+  task "lib/io/wait.jar" => "compile"
   libs = ["ext/java/lib", "lib"]
 when RUBY_VERSION < "2.6"
   task :compile do
