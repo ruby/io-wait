@@ -19,9 +19,6 @@ when RUBY_VERSION < "2.6"
     # noop
   end
 
-  task :clean do
-    # noop
-  end
   libs = []
 else
   require 'rake/extensiontask'
