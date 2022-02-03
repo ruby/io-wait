@@ -1,0 +1,21 @@
+name: jruby
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      matrix:
+        ruby: [ 'jruby-9.3' ]
+        os:   [ 'ubuntu' ]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+    - name: Install dev dependencies
+      run: bundle install
+    - name: Run test
+      run: rake

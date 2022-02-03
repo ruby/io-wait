@@ -11,5 +11,6 @@
 *.bundle
 *.dll
 *.so
+*.jar
 ChangeLog
 Gemfile.lock

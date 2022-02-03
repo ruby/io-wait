@@ -3,8 +3,8 @@ _VERSION = "0.2.2"
 Gem::Specification.new do |spec|
   spec.name          = "io-wait"
   spec.version       = _VERSION
-  spec.authors       = ["Nobu Nakada"]
-  spec.email         = ["nobu@ruby-lang.org"]
+  spec.authors       = ["Nobu Nakada", "Charles Oliver Nutter"]
+  spec.email         = ["nobu@ruby-lang.org", "headius@headius.com"]
 
   spec.summary       = %q{Waits until IO is readable or writable without blocking.}
   spec.description   = %q{Waits until IO is readable or writable without blocking.}
@@ -19,8 +19,16 @@ Gem::Specification.new do |spec|
       File.identical?(f, __FILE__) || f.match(%r{\A(?:(?:bin|test|spec|features|rakelib)/|\.(?:git|travis|circleci)|appveyor|Rakefile)})
     end
   end
-  spec.extensions    = %w[ext/io/wait/extconf.rb]
   spec.bindir        = "exe"
   spec.executables   = []
   spec.require_paths = ["lib"]
+
+  if Gem::Platform === spec.platform and spec.platform =~ 'java' or RUBY_ENGINE == 'jruby'
+    spec.platform = 'java'
+
+    spec.files += Dir["ext/java/lib/io/wait.rb", "lib/io/wait.jar"]
+    spec.require_paths += ["ext/java/lib"]
+  else
+    spec.extensions    = %w[ext/io/wait/extconf.rb]
+  end
 end
