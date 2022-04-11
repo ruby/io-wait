@@ -42,7 +42,7 @@ jobs:
       if: ${{matrix.ruby == '3.1' || matrix.platform}}
       shell: bash
     - name: Upload package
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         path: pkg/*
         name: ${{steps.build.outputs.pkg}}
