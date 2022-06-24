@@ -95,21 +95,24 @@ io_nread(VALUE io)
 
 #ifdef HAVE_RB_IO_WAIT
 static VALUE
-io_wait_event(VALUE io, int event, VALUE timeout)
+io_wait_event(VALUE io, int event, VALUE timeout, int return_io)
 {
     VALUE result = rb_io_wait(io, RB_INT2NUM(event), timeout);
 
     if (!RB_TEST(result)) {
-	return Qnil;
+        return Qnil;
     }
 
     int mask = RB_NUM2INT(result);
 
     if (mask & event) {
-	return io;
+        if (return_io)
+            return io;
+        else
+            return result;
     }
     else {
-	return Qfalse;
+        return Qfalse;
     }
 }
 #endif
@@ -137,13 +140,10 @@ io_ready_p(VALUE io)
     if (rb_io_read_pending(fptr)) return Qtrue;
 
 #ifndef HAVE_RB_IO_WAIT
-    if (wait_for_single_fd(fptr, RB_WAITFD_IN, &tv))
-	return Qtrue;
+    return wait_for_single_fd(fptr, RB_WAITFD_IN, &tv) ? Qtrue : Qfalse;
 #else
-    if (RTEST(io_wait_event(io, RUBY_IO_READABLE, RB_INT2NUM(0))))
-	return Qtrue;
+    return io_wait_event(io, RUBY_IO_READABLE, RB_INT2NUM(0), 1);
 #endif
-    return Qfalse;
 }
 
 /*
@@ -177,14 +177,14 @@ io_wait_readable(int argc, VALUE *argv, VALUE io)
 
 #ifndef HAVE_RB_IO_WAIT
     if (wait_for_single_fd(fptr, RB_WAITFD_IN, tv)) {
-	return io;
+        return io;
     }
     return Qnil;
 #else
     rb_check_arity(argc, 0, 1);
     VALUE timeout = (argc == 1 ? argv[0] : Qnil);
 
-    return io_wait_event(io, RUBY_IO_READABLE, timeout);
+    return io_wait_event(io, RUBY_IO_READABLE, timeout, 1);
 #endif
 }
 
@@ -213,14 +213,14 @@ io_wait_writable(int argc, VALUE *argv, VALUE io)
 #ifndef HAVE_RB_IO_WAIT
     tv = get_timeout(argc, argv, &timerec);
     if (wait_for_single_fd(fptr, RB_WAITFD_OUT, tv)) {
-	return io;
+        return io;
     }
     return Qnil;
 #else
     rb_check_arity(argc, 0, 1);
     VALUE timeout = (argc == 1 ? argv[0] : Qnil);
 
-    return io_wait_event(io, RUBY_IO_WRITABLE, timeout);
+    return io_wait_event(io, RUBY_IO_WRITABLE, timeout, 1);
 #endif
 }
 
@@ -231,7 +231,8 @@ io_wait_writable(int argc, VALUE *argv, VALUE io)
  *   io.wait_priority(timeout) -> truthy or falsy
  *
  * Waits until IO is priority and returns a truthy value or a falsy
- * value when times out.
+ * value when times out. Priority data is sent and received using
+ * the Socket::MSG_OOB flag and is typically limited to streams.
  *
  * You must require 'io/wait' to use this method.
  */
@@ -248,7 +249,7 @@ io_wait_priority(int argc, VALUE *argv, VALUE io)
     rb_check_arity(argc, 0, 1);
     VALUE timeout = argc == 1 ? argv[0] : Qnil;
 
-    return io_wait_event(io, RUBY_IO_PRIORITY, timeout);
+    return io_wait_event(io, RUBY_IO_PRIORITY, timeout, 1);
 }
 #endif
 
@@ -286,10 +287,22 @@ wait_mode_sym(VALUE mode)
     return 0;
 }
 
+#ifdef HAVE_RB_IO_WAIT
+static inline rb_io_event_t
+io_event_from_value(VALUE value)
+{
+    int events = RB_NUM2INT(value);
+
+    if (events <= 0) rb_raise(rb_eArgError, "Events must be positive integer!");
+
+    return events;
+}
+#endif
+
 /*
  * call-seq:
- *   io.wait(events, timeout) -> truthy or falsy
- *   io.wait(timeout = nil, mode = :read) -> truthy or falsy.
+ *   io.wait(events, timeout) -> event mask, false or nil
+ *   io.wait(timeout = nil, mode = :read) -> self, true, or false
  *
  * Waits until the IO becomes ready for the specified events and returns the
  * subset of events that become ready, or a falsy value when times out.
@@ -317,58 +330,72 @@ io_wait(int argc, VALUE *argv, VALUE io)
 
     GetOpenFile(io, fptr);
     for (i = 0; i < argc; ++i) {
-	if (SYMBOL_P(argv[i])) {
-	    event |= wait_mode_sym(argv[i]);
-	}
-	else {
-	    *(tv = &timerec) = rb_time_interval(argv[i]);
-	}
+        if (SYMBOL_P(argv[i])) {
+            event |= wait_mode_sym(argv[i]);
+        }
+        else {
+            *(tv = &timerec) = rb_time_interval(argv[i]);
+        }
     }
     /* rb_time_interval() and might_mode() might convert the argument */
     rb_io_check_closed(fptr);
     if (!event) event = RB_WAITFD_IN;
     if ((event & RB_WAITFD_IN) && rb_io_read_pending(fptr))
-	return Qtrue;
+        return Qtrue;
     if (wait_for_single_fd(fptr, event, tv))
-	return io;
+        return io;
     return Qnil;
 #else
     VALUE timeout = Qundef;
     rb_io_event_t events = 0;
+    int return_io = 0;
 
+    // The documented signature for this method is actually incorrect.
+    // A single timeout is allowed in any position, and multiple symbols can be given.
+    // Whether this is intentional or not, I don't know, and as such I consider this to
+    // be a legacy/slow path.
     if (argc != 2 || (RB_SYMBOL_P(argv[0]) || RB_SYMBOL_P(argv[1]))) {
-	for (int i = 0; i < argc; i += 1) {
-	    if (RB_SYMBOL_P(argv[i])) {
-		events |= wait_mode_sym(argv[i]);
-	    }
-	    else if (timeout == Qundef) {
-		rb_time_interval(timeout = argv[i]);
-	    }
-	    else {
-		rb_raise(rb_eArgError, "timeout given more than once");
-	    }
-	}
-	if (timeout == Qundef) timeout = Qnil;
-    }
-    else /* argc == 2 */ {
-	events = RB_NUM2UINT(argv[0]);
-	timeout = argv[1];
-    }
+        // We'd prefer to return the actual mask, but this form would return the io itself:
+        return_io = 1;
 
-    if (events == 0) {
-	events = RUBY_IO_READABLE;
+        // Slow/messy path:
+        for (int i = 0; i < argc; i += 1) {
+            if (RB_SYMBOL_P(argv[i])) {
+                events |= wait_mode_sym(argv[i]);
+            }
+            else if (timeout == Qundef) {
+                rb_time_interval(timeout = argv[i]);
+            }
+            else {
+                rb_raise(rb_eArgError, "timeout given more than once");
+            }
+        }
+
+        if (timeout == Qundef) timeout = Qnil;
+
+        if (events == 0) {
+            events = RUBY_IO_READABLE;
+        }
+    }
+    else /* argc == 2 and neither are symbols */ {
+        // This is the fast path:
+        events = io_event_from_value(argv[0]);
+        timeout = argv[1];
     }
 
     if (events & RUBY_IO_READABLE) {
-	rb_io_t *fptr = NULL;
-	RB_IO_POINTER(io, fptr);
+        rb_io_t *fptr = NULL;
+        RB_IO_POINTER(io, fptr);
 
-	if (rb_io_read_pending(fptr)) {
-	    return Qtrue;
-	}
+        if (rb_io_read_pending(fptr)) {
+            // This was the original behaviour:
+            if (return_io) return Qtrue;
+            // New behaviour always returns an event mask:
+            else return RB_INT2NUM(RUBY_IO_READABLE);
+        }
     }
 
-    return io_wait_event(io, events, timeout);
+    return io_wait_event(io, events, timeout, return_io);
 #endif
 }
 
