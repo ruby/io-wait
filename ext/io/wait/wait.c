@@ -146,6 +146,9 @@ io_ready_p(VALUE io)
 #endif
 }
 
+// Ruby 3.2+ can define these methods. This macro indicates that case.
+#ifndef RUBY_IO_WAIT_METHODS
+
 /*
  * call-seq:
  *   io.wait_readable          -> truthy or falsy
@@ -399,6 +402,8 @@ io_wait(int argc, VALUE *argv, VALUE io)
 #endif
 }
 
+#endif /* RUBY_IO_WAIT_METHODS */
+
 /*
  * IO wait methods
  */
@@ -413,11 +418,13 @@ Init_wait(void)
     rb_define_method(rb_cIO, "nread", io_nread, 0);
     rb_define_method(rb_cIO, "ready?", io_ready_p, 0);
 
+#ifndef RUBY_IO_WAIT_METHODS
     rb_define_method(rb_cIO, "wait", io_wait, -1);
 
     rb_define_method(rb_cIO, "wait_readable", io_wait_readable, -1);
     rb_define_method(rb_cIO, "wait_writable", io_wait_writable, -1);
 #ifdef HAVE_RB_IO_WAIT
     rb_define_method(rb_cIO, "wait_priority", io_wait_priority, -1);
+#endif
 #endif
 }
