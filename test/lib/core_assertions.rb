@@ -3,6 +3,10 @@
 module Test
   module Unit
     module Assertions
+      def assert_raises(*exp, &b)
+        raise NoMethodError, "use assert_raise", caller
+      end
+
       def _assertions= n # :nodoc:
         @_assertions = n
       end
@@ -33,6 +37,7 @@ module Test
     module CoreAssertions
       require_relative 'envutil'
       require 'pp'
+      nil.pretty_inspect
 
       def mu_pp(obj) #:nodoc:
         obj.pretty_inspect.chomp
@@ -253,7 +258,7 @@ module Test
           line ||= loc.lineno
         end
         capture_stdout = true
-        unless /mswin|mingw/ =~ RUBY_PLATFORM
+        unless /mswin|mingw/ =~ RbConfig::CONFIG['host_os']
           capture_stdout = false
           opt[:out] = Test::Unit::Runner.output if defined?(Test::Unit::Runner)
           res_p, res_c = IO.pipe
@@ -591,14 +596,14 @@ eom
 
       def assert_deprecated_warning(mesg = /deprecated/)
         assert_warning(mesg) do
-          Warning[:deprecated] = true
+          Warning[:deprecated] = true if Warning.respond_to?(:[]=)
           yield
         end
       end
 
       def assert_deprecated_warn(mesg = /deprecated/)
         assert_warn(mesg) do
-          Warning[:deprecated] = true
+          Warning[:deprecated] = true if Warning.respond_to?(:[]=)
           yield
         end
       end
@@ -690,7 +695,7 @@ eom
           msg = "exceptions on #{errs.length} threads:\n" +
             errs.map {|t, err|
             "#{t.inspect}:\n" +
-              RUBY_VERSION >= "2.5.0" ? err.full_message(highlight: false, order: :top) : err.message
+              err.full_message(highlight: false, order: :top)
           }.join("\n---\n")
           if message
             msg = "#{message}\n#{msg}"
