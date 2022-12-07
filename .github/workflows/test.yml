@@ -35,8 +35,8 @@ jobs:
         rake build:sha512
         cat pkg/SHA512
         gem=${GITHUB_REPOSITORY#*/}
-        echo "::set-output name=gem::$gem"
-        echo "::set-output name=pkg::$gem-${RUNNING_OS%-*}"
+        echo "gem=$gem" >> $GITHUB_OUTPUT
+        echo "pkg=$gem-${RUNNING_OS%-*}" >> $GITHUB_OUTPUT
       env:
         RUNNING_OS: ${{matrix.platform || matrix.os}}
       if: ${{matrix.ruby == '3.1' || matrix.platform}}
