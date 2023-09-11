@@ -25,7 +25,7 @@ jobs:
     outputs:
       gem: ${{steps.build.outputs.gem}}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up Ruby ${{ matrix.ruby }}
       uses: ruby/setup-ruby@v1
       with:
@@ -60,7 +60,7 @@ jobs:
         ruby: [ '2.5' ]
         os: [ ubuntu, macos, windows ]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
