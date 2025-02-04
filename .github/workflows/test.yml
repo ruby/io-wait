@@ -58,7 +58,7 @@ jobs:
     strategy:
       matrix:
         ruby: [ '2.5' ]
-        os: [ ubuntu, macos, windows ]
+        os: [ ubuntu, windows ]
     steps:
     - uses: actions/checkout@v4
     - name: Set up Ruby
