@@ -28,8 +28,6 @@ jobs:
             os: 'ubuntu'
             platform: 'java'
             continue-on-error: true
-    outputs:
-      gem: ${{steps.build.outputs.gem}}
     steps:
     - uses: actions/checkout@v4
     - name: Set up Ruby ${{ matrix.ruby }}
@@ -46,7 +44,6 @@ jobs:
         rake build:sha512
         cat pkg/SHA512
         gem=${GITHUB_REPOSITORY#*/}
-        echo "gem=$gem" >> $GITHUB_OUTPUT
         echo "pkg=$gem-${RUNNING_OS%-*}" >> $GITHUB_OUTPUT
       env:
         RUNNING_OS: ${{matrix.platform || matrix.os}}
@@ -58,23 +55,3 @@ jobs:
         path: pkg/*
         name: ${{steps.build.outputs.pkg}}
       if: steps.build.outputs.pkg
-
-  install:
-    runs-on: ${{ matrix.os }}-latest
-    needs: test
-    strategy:
-      matrix:
-        ruby: [ '3.0' ]
-        os: [ ubuntu, windows ]
-    steps:
-    - uses: actions/checkout@v4
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: ${{ matrix.ruby }}
-    - uses: actions/download-artifact@master
-      with:
-        name: ${{needs.test.outputs.gem}}-macos
-        path: pkg
-    - name: Install gem
-      run: gem install pkg/${{needs.test.outputs.gem}}*.gem

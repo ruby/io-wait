@@ -16,12 +16,6 @@ when RUBY_ENGINE == "jruby"
   task "build" => "lib/io/wait.jar"
   task "lib/io/wait.jar" => "compile"
   libs = ["ext/java/lib", "lib"]
-when RUBY_VERSION < "2.6"
-  task :compile do
-    # noop
-  end
-
-  libs = []
 else
   require 'rake/extensiontask'
   extask = Rake::ExtensionTask.new(name) do |x|
