@@ -19,11 +19,12 @@ jobs:
         ruby: ${{ fromJson(needs.ruby-versions.outputs.versions) }}
         os: [ ubuntu, macos, windows ]
         include:
-          - ruby: 'jruby-9.3'
+          - ruby: 'jruby'
             os: 'ubuntu'
             platform: 'java'
+            continue-on-error: true
             upload: true
-          - ruby: 'jruby-9.4'
+          - ruby: 'jruby-head'
             os: 'ubuntu'
             platform: 'java'
             continue-on-error: true
