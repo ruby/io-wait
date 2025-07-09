@@ -64,7 +64,7 @@ jobs:
     needs: test
     strategy:
       matrix:
-        ruby: [ '2.5' ]
+        ruby: [ '3.0' ]
         os: [ ubuntu, windows ]
     steps:
     - uses: actions/checkout@v4
