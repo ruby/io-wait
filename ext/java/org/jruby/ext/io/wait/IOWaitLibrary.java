@@ -56,47 +56,6 @@ public class IOWaitLibrary implements Library {
         ioClass.defineAnnotatedMethods(IOWaitLibrary.class);
     }
 
-    @JRubyMethod
-    public static IRubyObject nread(ThreadContext context, IRubyObject _io) {
-        Ruby runtime = context.runtime;
-        OpenFile fptr;
-        int len;
-//        ioctl_arg n;
-        RubyIO io = (RubyIO)_io;
-
-        warnDeprecated(context, "IO#nread is deprecated; use wait_readable instead");
-        fptr = io.getOpenFileChecked();
-        fptr.checkReadable(context);
-        len = fptr.readPending();
-        if (len > 0) return runtime.newFixnum(len);
-        // TODO: better effort to get available bytes from our channel
-//        if (!FIONREAD_POSSIBLE_P(fptr->fd)) return INT2FIX(0);
-//        if (ioctl(fptr->fd, FIONREAD, &n)) return INT2FIX(0);
-//        if (n > 0) return ioctl_arg2num(n);
-        // Because we can't get an actual system-level buffer available count, we fake it by returning 1 if ready
-        return RubyNumeric.int2fix(runtime, fptr.readyNow(context) ? 1 : 0);
-    }
-
-    /**
-     * returns non-nil if input available without blocking, false if EOF or not open/readable, otherwise nil.
-     */
-    @JRubyMethod(name = "ready?")
-    public static IRubyObject ready(ThreadContext context, IRubyObject _io) {
-        RubyIO io = (RubyIO)_io;
-        OpenFile fptr;
-//        ioctl_arg n;
-
-        warnDeprecated(context, "IO#ready? is deprecated; use wait_readable instead");
-        fptr = io.getOpenFileChecked();
-        fptr.checkReadable(context);
-        if (fptr.readPending() != 0) return context.tru;
-        // TODO: better effort to get available bytes from our channel
-//        if (!FIONREAD_POSSIBLE_P(fptr->fd)) return Qnil;
-//        if (ioctl(fptr->fd, FIONREAD, &n)) return Qnil;
-//        if (n > 0) return Qtrue;
-        return RubyBoolean.newBoolean(context, fptr.readyNow(context));
-    }
-
     @JRubyMethod(optional = 1)
     public static IRubyObject wait_readable(ThreadContext context, IRubyObject _io, IRubyObject[] argv) {
         RubyIO io = (RubyIO)_io;
