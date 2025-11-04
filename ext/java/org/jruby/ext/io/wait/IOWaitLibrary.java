@@ -44,6 +44,8 @@ import org.jruby.util.io.OpenFile;
 
 import java.nio.channels.SelectionKey;
 
+import static org.jruby.api.Warn.warnDeprecated;
+
 /**
  * @author Nick Sieger
  */
@@ -62,6 +64,7 @@ public class IOWaitLibrary implements Library {
 //        ioctl_arg n;
         RubyIO io = (RubyIO)_io;
 
+        warnDeprecated(context, "IO#nread is deprecated; use wait_readable instead");
         fptr = io.getOpenFileChecked();
         fptr.checkReadable(context);
         len = fptr.readPending();
@@ -83,6 +86,7 @@ public class IOWaitLibrary implements Library {
         OpenFile fptr;
 //        ioctl_arg n;
 
+        warnDeprecated(context, "IO#ready? is deprecated; use wait_readable instead");
         fptr = io.getOpenFileChecked();
         fptr.checkReadable(context);
         if (fptr.readPending() != 0) return context.tru;
