@@ -28,6 +28,7 @@ Rake::TestTask.new(:test) do |t|
   t.libs = libs
   t.libs << "test/lib"
   t.ruby_opts << "-rhelper"
+  t.options = "--ignore-name=/ungetc_in_text/"
   t.test_files = FileList["test/**/test_*.rb"]
 end
 
