@@ -12,6 +12,9 @@ jobs:
   push:
     if: github.repository == 'ruby/io-wait'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby: [ ruby, jruby ]
 
     environment:
       name: rubygems.org
@@ -33,7 +36,7 @@ jobs:
         uses: ruby/setup-ruby@eaecf785f6a34567a6d97f686bbb7bccc1ac1e5c # v1.237.0
         with:
           bundler-cache: true
-          ruby-version: ruby
+          ruby-version: ${{ matrix.ruby }}
 
       - name: Set remote URL
         run: |
@@ -64,3 +67,4 @@ jobs:
           gh release create "${tag_name}" --verify-tag --generate-notes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: ${{ matrix.ruby == 'ruby' }}
