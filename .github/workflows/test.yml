@@ -39,9 +39,17 @@ jobs:
     - name: Run test
       run: bundle exec rake
       continue-on-error: ${{ matrix.continue-on-error }}
-    - id: build
+    - name: Build and install gem
       run: |
         rake build:sha512
+        gem install --verbose --backtrace pkg/*.gem
+    - name: Run tests on the installed gem
+      run: |
+        gem install test-unit-ruby-core test-unit
+        rake test[installed]
+      if: ${{! startsWith(matrix.ruby, 'jruby') }}
+    - id: built
+      run: |
         cat pkg/SHA512
         gem=${GITHUB_REPOSITORY#*/}
         echo "pkg=$gem-${RUNNING_OS%-*}" >> $GITHUB_OUTPUT
@@ -53,5 +61,5 @@ jobs:
       uses: actions/upload-artifact@v5
       with:
         path: pkg/*
-        name: ${{steps.build.outputs.pkg}}
-      if: steps.build.outputs.pkg
+        name: ${{steps.built.outputs.pkg}}
+      if: steps.built.outputs.pkg

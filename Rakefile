@@ -25,6 +25,9 @@ else
 end
 
 Rake::TestTask.new(:test) do |t|
+  task :test, [:use] do |_, args|
+    t.libs.shift if args[:use] == "installed"
+  end
   t.libs = libs
   t.libs << "test/lib"
   t.ruby_opts << "-rhelper"
