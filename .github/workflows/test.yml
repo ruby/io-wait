@@ -50,7 +50,7 @@ jobs:
       if: ${{matrix.ruby == needs.ruby-versions.outputs.latest || matrix.upload}}
       shell: bash
     - name: Upload package
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         path: pkg/*
         name: ${{steps.build.outputs.pkg}}
