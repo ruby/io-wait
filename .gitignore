@@ -1,14 +1,4 @@
 /.bundle/
-/.yardoc
-/_yardoc/
-/coverage/
 /doc/
-/logs/
 /pkg/
-/spec/reports/
 /tmp/
-*.bundle
-*.dll
-*.so
-*.jar
-ChangeLog

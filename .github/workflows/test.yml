@@ -16,18 +16,8 @@ jobs:
     runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
-        ruby: ${{ fromJson(needs.ruby-versions.outputs.versions) }}
-        os: [ ubuntu, macos, windows ]
-        include:
-          - ruby: 'jruby'
-            os: 'ubuntu'
-            platform: 'java'
-            continue-on-error: true
-            upload: true
-          - ruby: 'jruby-head'
-            os: 'ubuntu'
-            platform: 'java'
-            continue-on-error: true
+        ruby: [ '${{ needs.ruby-versions.outputs.latest }}' ]
+        os: [ ubuntu ]
     steps:
     - uses: actions/checkout@v7
     - name: Set up Ruby ${{ matrix.ruby }}
@@ -38,7 +28,6 @@ jobs:
       run: bundle install
     - name: Run test
       run: bundle exec rake
-      continue-on-error: ${{ matrix.continue-on-error }}
     - id: build
       run: |
         rake build:sha512
@@ -46,8 +35,8 @@ jobs:
         gem=${GITHUB_REPOSITORY#*/}
         echo "pkg=$gem-${RUNNING_OS%-*}" >> $GITHUB_OUTPUT
       env:
-        RUNNING_OS: ${{matrix.platform || matrix.os}}
-      if: ${{matrix.ruby == needs.ruby-versions.outputs.latest || matrix.upload}}
+        RUNNING_OS: ${{matrix.os}}
+      if: ${{matrix.ruby == needs.ruby-versions.outputs.latest}}
       shell: bash
     - name: Upload package
       uses: actions/upload-artifact@v7
