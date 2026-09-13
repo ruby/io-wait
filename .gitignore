@@ -1,9 +1,4 @@
 /.bundle/
 /doc/
 /pkg/
-/spec/reports/
 /tmp/
-*.bundle
-*.dll
-*.so
-*.jar
