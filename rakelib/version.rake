@@ -11,19 +11,21 @@ class << (helper = Bundler::GemHelper.instance)
     end
   end
 
-  def commit_bump
+  def commit_bump(message: nil)
     dir, base = File.split(gemspec.loaded_from)
-    sh(["git", "-C", dir, "commit", "-m", "bump up to #{gemspec.version}", base])
+    sh(["git", "-C", dir, "commit", "-m", "bump up to #{gemspec.version}",
+        *(["-m", message] if message),
+        base])
   end
 
   def version=(v)
     gemspec.version = v
     update_gemspec
-    commit_bump
   end
 
-  def bump(major, minor = 0, teeny = 0, pre: nil)
+  def bump(major, minor = 0, teeny = 0, pre: nil, message: nil)
     self.version = [major, minor, teeny, *pre].compact.join(".")
+    commit_bump(message: message)
   end
 
   def next_prerelease(*pre)
@@ -53,9 +55,9 @@ task "bump:minor", [:pre] do |t, pre: nil|
   helper.bump(major, minor, pre: pre)
 end
 
-task "bump:major", [:pre] do |t, pre: nil|
+task "bump:major", [:pre, :message] do |t, pre: nil, message: nil|
   major += 1
-  helper.bump(major, pre: pre)
+  helper.bump(major, pre: pre, message: message)
 end
 
 task "bump" => (prerelease.empty? ? "bump:teeny" : "bump:dev")
