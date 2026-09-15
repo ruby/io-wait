@@ -44,17 +44,17 @@ task "bump:dev", [:pre] do |t, pre: helper.next_prerelease(*prerelease)|
 end
 
 task "bump:teeny", [:pre] do |t, pre: nil|
-  teeny += 1 if pre and !pre.empty?
+  teeny += 1
   helper.bump(major, minor, teeny, pre: pre)
 end
 
 task "bump:minor", [:pre] do |t, pre: nil|
-  minor += 1 if pre and !pre.empty?
+  minor += 1
   helper.bump(major, minor, pre: pre)
 end
 
 task "bump:major", [:pre] do |t, pre: nil|
-  major += 1 if pre and !pre.empty?
+  major += 1
   helper.bump(major, pre: pre)
 end
 
